@@ -1,57 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
-
-  @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
-}
-
-class _ProfileScreenState extends State<ProfileScreen> {
-  String userName = '';
-  String profileImagePath = '';
-
-  @override
-  void initState() {
-    super.initState();
-    loadUserProfile();
-  }
-
-  Future<void> loadUserProfile() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userName = prefs.getString('userName') ?? '';
-      profileImagePath = prefs.getString('profileImagePath') ?? '';
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('프로필')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
+      appBar: AppBar(
+        title: const Text('내 프로필'),
+        centerTitle: true,
+      ),
+      body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center, // 세로 중앙
+          crossAxisAlignment: CrossAxisAlignment.center, // 가로 중앙!!!
           children: [
-            CircleAvatar(
+            const CircleAvatar(
               radius: 50,
-              backgroundImage: profileImagePath.isNotEmpty
-                  ? FileImage(File(profileImagePath))
-                  : const AssetImage('assets/default_profile.png') as ImageProvider,
+              backgroundColor: Colors.purpleAccent,
             ),
             const SizedBox(height: 16),
-            Text(
-              userName.isNotEmpty ? userName : '이름을 설정해주세요',
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            const Text(
+              '닉네임: 여행자123',
+              style: TextStyle(fontSize: 18),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 8),
+            const Text(
+              '이메일: user@example.com',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+            const SizedBox(height: 32),
             ElevatedButton(
               onPressed: () {
-                // 프로필 수정 화면으로 이동
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('로그아웃 기능 준비 중')),
+                );
               },
-              child: const Text('프로필 수정'),
+              child: const Text('로그아웃'),
             ),
           ],
         ),
