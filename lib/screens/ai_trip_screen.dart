@@ -30,10 +30,29 @@ class _AITripScreenState extends State<AITripScreen> {
   int step = 1;
 
   /* ----------------------------- 서버 호출 ---------------------------- */
+
+  void _showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text("여행 일정을생성 중입니다..."),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> generateTrip() async {
     final uri = Uri.parse(dotenv.env['API_URL']!);
     setState(() => loading = true);
-
+    _showLoadingDialog();
     try {
       final response = await http.post(
         uri,
@@ -64,6 +83,8 @@ class _AITripScreenState extends State<AITripScreen> {
       _errorDialog(e.toString());
     } finally {
       setState(() => loading = false);
+      Navigator.of(context, rootNavigator: true).pop(); // 다이얼로그 닫기
+
     }
   }
 
@@ -86,9 +107,13 @@ class _AITripScreenState extends State<AITripScreen> {
   );
 
   Post.postStorage.add(newPost);
-
-  // 이후에 상태 업데이트 또는 서버 전송 로직 추가
-  //print('새 게시물 작성됨: ${newPost.username}');
+  
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text('게시물이 등록되었습니다!'),
+      duration: Duration(seconds: 2),
+    ),
+  );
 }
 
   /* ----------------------------- UI ----------------------------- */

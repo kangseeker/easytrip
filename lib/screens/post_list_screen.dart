@@ -11,8 +11,6 @@ class PostListScreen extends StatefulWidget {
 }
 
 class _PostListScreenState extends State<PostListScreen> {
-  //final List<Post> _posts = postStorage;
-
 
   @override
   Widget build(BuildContext context) {
