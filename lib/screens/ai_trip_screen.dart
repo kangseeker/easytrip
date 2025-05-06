@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../widgets/trip_map.dart';
 import '../models/trip_location.dart';
+import '../models/post.dart';
 
 class AITripScreen extends StatefulWidget {
   const AITripScreen({super.key});
@@ -75,6 +77,20 @@ class _AITripScreenState extends State<AITripScreen> {
     );
   }
 
+  void _createPost() {
+  final randomNumber = Random().nextInt(10000);
+  final newPost = Post(
+    username: 'UNI$randomNumber',
+    content: 'AI 추천 여행지 게시글입니다.',
+    image: '지도 이미지 대체 예정',
+  );
+
+  Post.postStorage.add(newPost);
+
+  // 이후에 상태 업데이트 또는 서버 전송 로직 추가
+  //print('새 게시물 작성됨: ${newPost.username}');
+}
+
   /* ----------------------------- UI ----------------------------- */
   @override
   Widget build(BuildContext context) {
@@ -128,6 +144,16 @@ class _AITripScreenState extends State<AITripScreen> {
                       child: const Text('새 여행 만들기'),
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _createPost(); // 게시글 생성 함수
+                      },
+                      child: const Text('게시물 작성하기'),
+                    ),
+                  ),
+
                 ],
               ),
             ),
@@ -261,6 +287,7 @@ class _AITripScreenState extends State<AITripScreen> {
               onPressed: loading ? null : generateTrip,
               child: const Text('여행 일정 생성'),
             ),
+
           ],
         ),
       ],

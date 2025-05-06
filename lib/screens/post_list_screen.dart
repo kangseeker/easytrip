@@ -1,21 +1,27 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../models/post.dart';
 
 
-class PostListScreen extends StatelessWidget {
-  final String username = 'UNI_SEOUL1234'; // 임시 닉네임(UNI+지역명+난수)
-
+class PostListScreen extends StatefulWidget {
   const PostListScreen({super.key});
+
+  @override
+  State<PostListScreen> createState() => _PostListScreenState();
+}
+
+class _PostListScreenState extends State<PostListScreen> {
+  //final List<Post> _posts = postStorage;
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('게시물'),
-      ),
+      appBar: AppBar(title: const Text('게시물')),
       body: ListView.builder(
-        itemCount: 3, // 임시 게시글 3개
+        itemCount: Post.postStorage.length,
         itemBuilder: (context, index) {
+          final post = Post.postStorage[index];
           return Card(
             margin: const EdgeInsets.all(12),
             child: Column(
@@ -26,13 +32,14 @@ class PostListScreen extends StatelessWidget {
                     backgroundColor: Colors.blueAccent,
                     child: Icon(Icons.person),
                   ),
-                  title: Text(username),
-                  subtitle: Text( '게시글입니다'),
+                  title: Text(post.username),
+                  subtitle: Text(post.content),
                 ),
                 Container(
                   height: 200,
-                  color: Colors.orangeAccent, // 나중에 이미지로 대체 가능
-                  child: const Center(child: Text('사진 영역 (지도 이미지 대체 예정)')),
+                  color: Colors.orangeAccent,
+                  alignment: Alignment.center,
+                  child: Text(post.image),
                 ),
                 ButtonBar(
                   children: [
@@ -48,6 +55,7 @@ class PostListScreen extends StatelessWidget {
           );
         },
       ),
+
     );
   }
 }
