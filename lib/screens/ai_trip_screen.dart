@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:lottie/lottie.dart';
 
-import '../widgets/trip_map.dart';
 import '../models/trip_location.dart';
+import 'trip_result_screen.dart';
 
 class AITripScreen extends StatefulWidget {
   const AITripScreen({super.key});
@@ -22,15 +23,38 @@ class _AITripScreenState extends State<AITripScreen> {
   String? selectedTravelStyle;
   String? selectedActivity;
 
-  String tripPlan = '';
-  List<TripLocation> locations = [];
-  bool loading = false;
   int step = 1;
 
-  /* ----------------------------- 서버 호출 ---------------------------- */
   Future<void> generateTrip() async {
     final uri = Uri.parse(dotenv.env['API_URL']!);
-    setState(() => loading = true);
+
+    // ✅ 로딩 다이얼로그
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Lottie.asset(
+                'assets/lottie/loading.json',
+                width: 120,
+                height: 120,
+                repeat: true,
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'AI 여행일정 생성 중',
+                style: TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
 
     try {
       final response = await http.post(
@@ -48,20 +72,29 @@ class _AITripScreenState extends State<AITripScreen> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        setState(() {
-          tripPlan = data['plan'] ?? '';
-          locations = (data['locations'] as List)
-              .map((e) => TripLocation.fromJson(e))
-              .toList();
-          step = 4;
-        });
+        final parsedPlan = data['plan'] ?? '';
+        final parsedLocations = (data['locations'] as List)
+            .map((e) => TripLocation.fromJson(e))
+            .toList();
+
+        if (!mounted) return;
+        Navigator.pop(context); // 로딩창 닫기
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => TripResultScreen(
+              tripPlan: parsedPlan,
+              locations: parsedLocations,
+            ),
+          ),
+        );
       } else {
+        Navigator.pop(context);
         _errorDialog('서버 오류: ${response.statusCode}');
       }
     } catch (e) {
-      _errorDialog(e.toString());
-    } finally {
-      setState(() => loading = false);
+      Navigator.pop(context);
+      _errorDialog('에러 발생: $e');
     }
   }
 
@@ -71,79 +104,30 @@ class _AITripScreenState extends State<AITripScreen> {
       builder: (_) => AlertDialog(
         title: const Text('에러'),
         content: Text(msg),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('확인'),
+          ),
+        ],
       ),
     );
   }
 
-  /* ----------------------------- UI ----------------------------- */
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('AI 여행 추천')),
-      body: step == 4
-          ? _buildResultScreen()
-          : _buildStepScreen(),
+      body: _buildStepScreen(),
     );
   }
 
-  /* ---------------------- 결과 화면 (지도 + 바텀시트) ---------------------- */
-  Widget _buildResultScreen() {
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: TripMap(locations: locations),
-        ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: Container(
-            height: 280,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-              boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
-            ),
-            padding: const EdgeInsets.all(16),
-            child: loading
-                ? const Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    tripPlan,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () => setState(() {
-                        tripPlan = '';
-                        locations = [];
-                        selectedWalking =
-                            selectedTravelStyle = selectedActivity = null;
-                        step = 1;
-                      }),
-                      child: const Text('새 여행 만들기'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /* ---------------------- 1~3단계 입력 화면 ---------------------- */
   Widget _buildStepScreen() {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: ListView(
         children: [
-          Text('Step $step of 4',
+          Text('Step $step of 3',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           const SizedBox(height: 16),
           if (step == 1) _buildStep1(),
@@ -258,7 +242,7 @@ class _AITripScreenState extends State<AITripScreen> {
               child: const Text('이전'),
             ),
             ElevatedButton(
-              onPressed: loading ? null : generateTrip,
+              onPressed: generateTrip,
               child: const Text('여행 일정 생성'),
             ),
           ],
