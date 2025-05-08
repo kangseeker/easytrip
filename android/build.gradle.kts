@@ -19,3 +19,13 @@ subprojects {
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
+
+buildscript {
+    repositories {
+        google()          // ✅ 반드시 있어야 함
+        mavenCentral()    // ✅ 추가로 안정성 확보
+    }
+    dependencies {
+        classpath("com.google.gms:google-services:4.3.15")
+    }
+}
