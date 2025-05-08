@@ -102,23 +102,6 @@ class _FriendScreenState extends State<FriendScreen> {
     });
   }
 
-  void _viewFriendPosts(String friendName) {
-    // 임시로 다이얼로그만 띄움 - 나중에 게시물 화면으로 이동할 수 있음
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('게시물 보기'),
-        content: Text('$friendName님의 게시물을 보는 기능입니다.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('닫기'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -135,24 +118,9 @@ class _FriendScreenState extends State<FriendScreen> {
                   leading: const CircleAvatar(child: Icon(Icons.person)),
                   title: Text(friend.name),
                   subtitle: Text(friend.email),
-                  trailing: PopupMenuButton<String>(
-                    onSelected: (value) {
-                      if (value == 'delete') {
-                        _confirmRemoveFriend(friend.id, friend.name);
-                      } else if (value == 'posts') {
-                        _viewFriendPosts(friend.name);
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'posts',
-                        child: Text('게시물 보기'),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Text('삭제'),
-                      ),
-                    ],
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () => _confirmRemoveFriend(friend.id, friend.name),
                   ),
                 );
               },
