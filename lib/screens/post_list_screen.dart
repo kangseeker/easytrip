@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../models/post.dart';
-
+import '../screens/post_detail.dart';
 
 class PostListScreen extends StatefulWidget {
   const PostListScreen({super.key});
@@ -26,25 +26,42 @@ class _PostListScreenState extends State<PostListScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ListTile(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PostDetailScreen(post: post),
+                      ),
+                    );
+                  },
                   leading: const CircleAvatar(
-                    backgroundColor: Colors.blueAccent,
+                    backgroundColor: Color.fromARGB(255, 188, 213, 255),
                     child: Icon(Icons.person),
                   ),
                   title: Text(post.username),
-                  subtitle: Text(post.content),
+                  subtitle: Text(
+                     post.content.length > 30
+                    ? '${post.content.substring(0, 30)}...'
+                    : post.content,
+                  ),
                 ),
+                /*
                 Container(
                   height: 200,
                   color: Colors.orangeAccent,
                   alignment: Alignment.center,
                   child: Text(post.image),
-                ),
+                ),*/
                 ButtonBar(
                   children: [
                     TextButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        setState(() {
+                          post.likes++; // 좋아요 1 증가
+                        });
+                      },
                       icon: const Icon(Icons.favorite_border),
-                      label: const Text('좋아요'),
+                      label: Text('좋아요 (${post.likes})'),
                     )
                   ],
                 )

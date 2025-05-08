@@ -102,15 +102,18 @@ class _AITripScreenState extends State<AITripScreen> {
   final randomNumber = Random().nextInt(10000);
   final newPost = Post(
     username: 'UNI$randomNumber',
-    content: 'AI 추천 여행지 게시글입니다.',
-    image: '지도 이미지 대체 예정',
+    content: '${destinationController.text}에서 '
+             '${daysController.text}일 동안 '
+             '${selectedTravelStyle} 여행할 예정!'
+             '\n\n$tripPlan',
+    // image: '지도 이미지 대체 예정',
   );
 
   Post.postStorage.add(newPost);
   
   ScaffoldMessenger.of(context).showSnackBar(
     const SnackBar(
-      content: Text('게시물이 등록되었습니다!'),
+      content: Text('나만의 일정이 업로드되었습니다!'),
       duration: Duration(seconds: 2),
     ),
   );
@@ -175,7 +178,7 @@ class _AITripScreenState extends State<AITripScreen> {
                       onPressed: () {
                         _createPost(); // 게시글 생성 함수
                       },
-                      child: const Text('게시물 작성하기'),
+                      child: const Text('여행 일정 자랑하기'),
                     ),
                   ),
 
@@ -244,7 +247,8 @@ class _AITripScreenState extends State<AITripScreen> {
         const SizedBox(height: 10),
         DropdownButtonFormField<String>(
           value: selectedPeopleType,
-          items: ['연인', '가족', '친구', '혼자']
+          items: ['연인과 함께', '어르신을 포함한 가족이 함께','아이를 포함한 가족이 함께',
+                  '친구들과','동호회 혹은은 소모임으로 ','혼자 떠나는']
               .map((e) => DropdownMenuItem(value: e, child: Text(e)))
               .toList(),
           onChanged: (val) => setState(() => selectedPeopleType = val),
@@ -278,7 +282,8 @@ class _AITripScreenState extends State<AITripScreen> {
       children: [
         DropdownButtonFormField<String>(
           value: selectedWalking,
-          items: ['많이 걷기', '적게 걷기']
+          items: ['자가용 혹은 렌터카 이용', '대중교통 선호', '택시 이용',
+                  '짧은거리만 도보 이동','도보 이동 중심']
               .map((e) => DropdownMenuItem(value: e, child: Text(e)))
               .toList(),
           onChanged: (val) => setState(() => selectedWalking = val),
@@ -286,7 +291,7 @@ class _AITripScreenState extends State<AITripScreen> {
         ),
         DropdownButtonFormField<String>(
           value: selectedTravelStyle,
-          items: ['여유롭게', '알차게', '중간 정도']
+          items: ['여유롭게 즐기면서', '계획적으로 알차게', '계획적이지만 널널하게']
               .map((e) => DropdownMenuItem(value: e, child: Text(e)))
               .toList(),
           onChanged: (val) => setState(() => selectedTravelStyle = val),
@@ -294,7 +299,8 @@ class _AITripScreenState extends State<AITripScreen> {
         ),
         DropdownButtonFormField<String>(
           value: selectedActivity,
-          items: ['체험 위주', '관람 위주', '문화 중심']
+          items: ['액티비티/레저 중심', '유명 관광지 구경 위주',
+                  '맛집/카페 탐방', '역사/문화/자연 체험', '쇼핑 중심']
               .map((e) => DropdownMenuItem(value: e, child: Text(e)))
               .toList(),
           onChanged: (val) => setState(() => selectedActivity = val),
