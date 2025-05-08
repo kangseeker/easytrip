@@ -41,7 +41,7 @@ class _AITripScreenState extends State<AITripScreen> {
             children: [
               CircularProgressIndicator(),
               SizedBox(width: 16),
-              Text("여행 일정을생성 중입니다..."),
+              Text("여행 일정을 생성 중입니다..."),
             ],
           ),
         );
