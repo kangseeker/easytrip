@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'screens/login_screen.dart';
 import 'screens/ai_trip_screen.dart';
 import 'screens/post_list_screen.dart';
 import 'screens/friend_screen.dart';
@@ -6,7 +10,11 @@ import 'screens/profile_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env"); // ✅ 반드시 dotenv 불러오기
+  await Firebase.initializeApp(              //  Firebase 초기화
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const easy_trip());
 }
 
@@ -21,7 +29,26 @@ class easy_trip extends StatelessWidget { //
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MainScreen(),
+      home: AuthGate(),
+    );
+  }
+}
+
+// 로그인 상태에 따라 화면을 결정하는 위젯
+class AuthGate extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasData) {
+          return const MainScreen(); // 로그인 완료 시
+        } else {
+          return const LoginScreen(); // 로그인 필요 시
+        }
+      },
     );
   }
 }
