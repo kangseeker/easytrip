@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'screens/login_screen.dart';
 import 'screens/ai_trip_screen.dart';
 import 'screens/post_list_screen.dart';
 import 'screens/friend_screen.dart';
@@ -6,12 +11,26 @@ import 'screens/profile_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
-  await dotenv.load(fileName: ".env"); // ✅ 반드시 dotenv 불러오기
-  runApp(const easy_trip());
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // ✅ 시스템 상태바: 흰 배경 + 검정 아이콘
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.white,
+      statusBarIconBrightness: Brightness.dark,
+    ),
+  );
+
+  await dotenv.load(fileName: ".env");
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  runApp(const EasyTripApp());
 }
 
-class easy_trip extends StatelessWidget { //
-  const easy_trip({super.key});
+class EasyTripApp extends StatelessWidget {
+  const EasyTripApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,13 +38,58 @@ class easy_trip extends StatelessWidget { //
       title: 'EasyTrip',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        useMaterial3: false,
+        primarySwatch: Colors.lightBlue,
+        scaffoldBackgroundColor: Colors.white,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          elevation: 0,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Color(0xFF42A5F5), // 하늘색
+            foregroundColor: Colors.white,
+            textStyle: TextStyle(fontSize: 16),
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Color(0xFF42A5F5),
+            side: BorderSide(color: Color(0xFF42A5F5)),
+            textStyle: TextStyle(fontSize: 16),
+          ),
+        ),
       ),
-      home: const MainScreen(),
+      home: const AuthGate(),
     );
   }
 }
 
+// 로그인 상태에 따라 메인 or 로그인 화면으로
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        } else if (snapshot.hasData) {
+          return const MainScreen(); // 로그인 상태
+        } else {
+          return const LoginScreen(); // 비로그인
+        }
+      },
+    );
+  }
+}
+
+// 바텀 내비게이션 메인 화면
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -56,7 +120,7 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        selectedItemColor: Colors.blue,
+        selectedItemColor: const Color(0xFF42A5F5), // 하늘색 강조
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(

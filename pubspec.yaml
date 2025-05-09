@@ -20,6 +20,9 @@ dependencies:
   url_launcher: ^6.2.5
   cupertino_icons: ^1.0.8
   lottie: ^2.7.0
+  firebase_auth: ^5.5.3
+  google_sign_in: ^6.3.0
+  firebase_core: ^3.13.0
 
 dev_dependencies:
   flutter_test:
@@ -32,3 +35,4 @@ flutter:
   assets:
     - .env
     - assets/lottie/loading.json
+    - assets/lottie/Trip.json

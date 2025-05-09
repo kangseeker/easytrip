@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/trip_location.dart';
 import '../widgets/trip_map.dart';
+import '../models/saved_trip.dart';
 
 class TripResultScreen extends StatelessWidget {
   final String tripPlan;
@@ -40,7 +41,6 @@ class TripResultScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    // 핸들바
                     Padding(
                       padding: const EdgeInsets.only(top: 12, bottom: 8),
                       child: Container(
@@ -52,8 +52,6 @@ class TripResultScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-
-                    // 일정 내용
                     Expanded(
                       child: ListView(
                         controller: scrollController,
@@ -61,6 +59,42 @@ class TripResultScreen extends StatelessWidget {
                         children: _buildTripSections(tripPlan),
                       ),
                     ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text("일정 다시 생성"),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                final savedTrip = SavedTrip(
+                                  plan: tripPlan,
+                                  savedAt: DateTime.now(),
+                                );
+                                SavedTrip.savedTrips.add(savedTrip);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('여행 일정이 저장되었습니다!'),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              },
+                              child: const Text("일정 저장하기"),
+                            ),
+                          ),
+
+                        ],
+                      ),
+                    )
                   ],
                 ),
               );
@@ -76,11 +110,10 @@ class TripResultScreen extends StatelessWidget {
     final widgets = <Widget>[];
 
     for (final rawLine in lines) {
-      final line = rawLine.trimLeft(); // ⬅️ 공백 제거
+      final line = rawLine.trimLeft();
 
       if (line.isEmpty) continue;
 
-      // Day 구간
       if (line.startsWith('## Day')) {
         widgets.addAll([
           const Divider(color: Colors.grey, thickness: 0.6),
@@ -102,10 +135,7 @@ class TripResultScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
         ]);
-      }
-
-      // 오전 / 오후
-      else if (line.startsWith('###')) {
+      } else if (line.startsWith('###')) {
         widgets.addAll([
           const Divider(color: Colors.grey, thickness: 0.3),
           Padding(
@@ -120,10 +150,7 @@ class TripResultScreen extends StatelessWidget {
             ),
           ),
         ]);
-      }
-
-      // 점심 / 저녁 / 숙소추천
-      else if (line.startsWith('점심:') || line.startsWith('저녁:') || line.startsWith('숙소추천:')) {
+      } else if (line.startsWith('점심:') || line.startsWith('저녁:') || line.startsWith('숙소추천:')) {
         final parts = line.split(':');
         widgets.add(Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -148,10 +175,7 @@ class TripResultScreen extends StatelessWidget {
             ),
           ),
         ));
-      }
-
-      // 일반 텍스트
-      else {
+      } else {
         widgets.add(Padding(
           padding: const EdgeInsets.only(left: 12.0, bottom: 8),
           child: Text(

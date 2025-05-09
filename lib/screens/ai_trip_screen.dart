@@ -1,11 +1,8 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:lottie/lottie.dart';
 
-import '../models/trip_location.dart';
-import 'trip_result_screen.dart';
+import 'trip_input_screen.dart';
+import '../models/saved_trip.dart';
 
 class AITripScreen extends StatefulWidget {
   const AITripScreen({super.key});
@@ -14,240 +11,88 @@ class AITripScreen extends StatefulWidget {
   State<AITripScreen> createState() => _AITripScreenState();
 }
 
-class _AITripScreenState extends State<AITripScreen> {
-  final destinationController = TextEditingController();
-  final daysController = TextEditingController();
+class _AITripScreenState extends State<AITripScreen> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
 
-  String? selectedPeopleType;
-  String? selectedWalking;
-  String? selectedTravelStyle;
-  String? selectedActivity;
-
-  int step = 1;
-
-  Future<void> generateTrip() async {
-    final uri = Uri.parse(dotenv.env['API_URL']!);
-
-    // ✅ 로딩 다이얼로그
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Lottie.asset(
-                'assets/lottie/loading.json',
-                width: 120,
-                height: 120,
-                repeat: true,
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'AI 여행일정 생성 중',
-                style: TextStyle(fontSize: 16),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    try {
-      final response = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'destination': destinationController.text,
-          'days': daysController.text,
-          'peopleType': selectedPeopleType,
-          'walkingPreference': selectedWalking,
-          'travelStyle': selectedTravelStyle,
-          'activityStyle': selectedActivity,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final parsedPlan = data['plan'] ?? '';
-        final parsedLocations = (data['locations'] as List)
-            .map((e) => TripLocation.fromJson(e))
-            .toList();
-
-        if (!mounted) return;
-        Navigator.pop(context); // 로딩창 닫기
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => TripResultScreen(
-              tripPlan: parsedPlan,
-              locations: parsedLocations,
-            ),
-          ),
-        );
-      } else {
-        Navigator.pop(context);
-        _errorDialog('서버 오류: ${response.statusCode}');
-      }
-    } catch (e) {
-      Navigator.pop(context);
-      _errorDialog('에러 발생: $e');
-    }
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this);
   }
 
-  void _errorDialog(String msg) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('에러'),
-        content: Text(msg),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('확인'),
-          ),
-        ],
-      ),
-    );
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('AI 여행 추천')),
-      body: _buildStepScreen(),
-    );
-  }
+      appBar: AppBar(title: const Text('Easy trip')),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Center(
+                child: Lottie.asset(
+                  'assets/lottie/Trip.json',
+                  controller: _controller,
+                  onLoaded: (composition) {
+                    _controller
+                      ..duration = composition.duration * 1.5
+                      ..value = 0;
+                    _controller.forward();
+                  },
+                  width: 300,
+                  height: 300,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
 
-  Widget _buildStepScreen() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: ListView(
-        children: [
-          Text('Step $step of 3',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(height: 16),
-          if (step == 1) _buildStep1(),
-          if (step == 2) _buildStep2(),
-          if (step == 3) _buildStep3(),
-        ],
+            // 버튼 1: AI에게 여행일정 받기
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.travel_explore),
+                label: const Text('AI에게 여행일정 받기'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const TripInputScreen()),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // 버튼 2: 저장한 일정 보기 → SavedTripListScreen
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.bookmark), // 아이콘도 바꿈
+                label: const Text('저장한 일정 보기'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SavedTripListScreen()),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
-    );
-  }
-
-  Widget _buildStep1() {
-    return Column(
-      children: [
-        TextField(
-          controller: destinationController,
-          decoration: InputDecoration(
-            hintText: '어디로 여행을 떠나시나요?',
-            prefixIcon: const Icon(Icons.search),
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding:
-            const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
-          ),
-        ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: () {
-            if (destinationController.text.isNotEmpty) {
-              setState(() => step = 2);
-            }
-          },
-          child: const Text('다음'),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStep2() {
-    return Column(
-      children: [
-        TextField(
-          controller: daysController,
-          decoration: const InputDecoration(labelText: '여행 일수'),
-          keyboardType: TextInputType.number,
-        ),
-        const SizedBox(height: 10),
-        DropdownButtonFormField<String>(
-          value: selectedPeopleType,
-          items: ['연인', '가족', '친구', '혼자']
-              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-              .toList(),
-          onChanged: (val) => setState(() => selectedPeopleType = val),
-          decoration: const InputDecoration(labelText: '동행 유형'),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            TextButton(
-              onPressed: () => setState(() => step = 1),
-              child: const Text('이전'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (daysController.text.isNotEmpty &&
-                    selectedPeopleType != null) {
-                  setState(() => step = 3);
-                }
-              },
-              child: const Text('다음'),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStep3() {
-    return Column(
-      children: [
-        DropdownButtonFormField<String>(
-          value: selectedWalking,
-          items: ['많이 걷기', '적게 걷기']
-              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-              .toList(),
-          onChanged: (val) => setState(() => selectedWalking = val),
-          decoration: const InputDecoration(labelText: '이동 스타일'),
-        ),
-        DropdownButtonFormField<String>(
-          value: selectedTravelStyle,
-          items: ['여유롭게', '알차게', '중간 정도']
-              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-              .toList(),
-          onChanged: (val) => setState(() => selectedTravelStyle = val),
-          decoration: const InputDecoration(labelText: '여행 스타일'),
-        ),
-        DropdownButtonFormField<String>(
-          value: selectedActivity,
-          items: ['체험 위주', '관람 위주', '문화 중심']
-              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-              .toList(),
-          onChanged: (val) => setState(() => selectedActivity = val),
-          decoration: const InputDecoration(labelText: '활동 성향'),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            TextButton(
-              onPressed: () => setState(() => step = 2),
-              child: const Text('이전'),
-            ),
-            ElevatedButton(
-              onPressed: generateTrip,
-              child: const Text('여행 일정 생성'),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }
