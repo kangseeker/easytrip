@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../models/trip_location.dart';
 import '../widgets/trip_map.dart';
 import '../models/saved_trip.dart';
+import 'post_write_screen.dart';
 
 class TripResultScreen extends StatelessWidget {
   final String tripPlan;
@@ -101,6 +102,12 @@ class TripResultScreen extends StatelessWidget {
                                 if (response.statusCode == 200) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(content: Text('여행 일정이 저장되었습니다!')),
+                                  );
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const SavedTripListScreen(),
+                                    ),
                                   );
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(

@@ -5,6 +5,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/post.dart';
 import 'post_detail.dart';
+import 'post_write_screen.dart';
+
 
 class PostListScreen extends StatefulWidget {
   const PostListScreen({super.key});
@@ -95,6 +97,21 @@ class _PostListScreenState extends State<PostListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('게시물')),
+
+      // ✅ 아래에 둥근 + 버튼 추가
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const PostWriteScreen(),
+            ),
+          ).then((_) => fetchPosts()); // 작성 후 목록 갱신
+        },
+        child: const Icon(Icons.add),
+        backgroundColor: Theme.of(context).primaryColor,
+      ),
+
       body: ListView.builder(
         itemCount: postList.length,
         itemBuilder: (context, index) {

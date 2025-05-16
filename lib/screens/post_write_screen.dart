@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'post_list_screen.dart';
+
 
 class PostWriteScreen extends StatefulWidget {
   final String? attachedPlan; // 저장된 여행 일정 연결용
@@ -53,7 +55,13 @@ class _PostWriteScreenState extends State<PostWriteScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('게시물이 등록되었습니다!')),
       );
-      Navigator.pop(context);
+
+      // ✅ PostListScreen으로 이동하면서 이전 화면은 모두 제거
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const PostListScreen()),
+            (route) => false,
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('등록 실패: ${response.statusCode}')),
