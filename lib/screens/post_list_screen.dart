@@ -7,7 +7,6 @@ import '../models/post.dart';
 import 'post_detail.dart';
 import 'post_write_screen.dart';
 
-
 class PostListScreen extends StatefulWidget {
   const PostListScreen({super.key});
 
@@ -98,7 +97,7 @@ class _PostListScreenState extends State<PostListScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('게시물')),
 
-      // ✅ 아래에 둥근 + 버튼 추가
+      // ✅ 글쓰기 버튼: 연필 아이콘 + 흰색
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -106,10 +105,11 @@ class _PostListScreenState extends State<PostListScreen> {
             MaterialPageRoute(
               builder: (_) => const PostWriteScreen(),
             ),
-          ).then((_) => fetchPosts()); // 작성 후 목록 갱신
+          ).then((_) => fetchPosts());
         },
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.edit),
         backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Colors.white,
       ),
 
       body: ListView.builder(
@@ -134,7 +134,7 @@ class _PostListScreenState extends State<PostListScreen> {
                     onTap: () => addFriend(post.userUid),
                     child: const CircleAvatar(
                       backgroundColor: Color.fromARGB(255, 188, 213, 255),
-                      child: Icon(Icons.edit),
+                      child: Icon(Icons.person_add),
                     ),
                   ),
                   title: Text(post.username),
@@ -161,4 +161,3 @@ class _PostListScreenState extends State<PostListScreen> {
     );
   }
 }
-

@@ -20,7 +20,8 @@ class LoginScreen extends StatelessWidget {
       );
 
       // Firebase 로그인
-      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(
+          credential);
       final user = userCredential.user;
 
       // ✅ 로그인 성공 후 사용자 정보 서버에 등록
@@ -30,11 +31,12 @@ class LoginScreen extends StatelessWidget {
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             'uid': user.uid,
-            'display_name': user.displayName ?? user.email?.split('@').first ?? '익명',
+            'display_name': user.displayName ?? user.email
+                ?.split('@')
+                .first ?? '익명',
           }),
         );
       }
-
     } catch (e) {
       print('로그인 실패: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -46,11 +48,35 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Center(
-        child: ElevatedButton.icon(
-          icon: Icon(Icons.login),
-          label: Text('Google 계정으로 로그인'),
-          onPressed: () => _signInWithGoogle(context),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // ✅ 로고 이미지 추가
+            Image.asset(
+              'assets/logo_text.png',
+              width: MediaQuery
+                  .of(context)
+                  .size
+                  .width * 0.8,
+            ),
+            const SizedBox(height: 48), // 로고와 버튼 간 여백
+
+            // ✅ 로그인 버튼
+            ElevatedButton.icon(
+              icon: const Icon(Icons.login),
+              label: const Text('Google 계정으로 로그인'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF42A5F5), // 버튼 색
+                foregroundColor: Colors.white, // 글자 + 아이콘 흰색
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24, vertical: 12),
+                textStyle: const TextStyle(fontSize: 16),
+              ),
+              onPressed: () => _signInWithGoogle(context),
+            ),
+          ],
         ),
       ),
     );

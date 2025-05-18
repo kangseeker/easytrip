@@ -185,6 +185,7 @@ class _FriendScreenState extends State<FriendScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddDialog,
         child: const Icon(Icons.add),
+        foregroundColor: Colors.white,
       ),
     );
   }
