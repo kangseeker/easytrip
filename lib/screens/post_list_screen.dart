@@ -134,7 +134,7 @@ class _PostListScreenState extends State<PostListScreen> {
                     onTap: () => addFriend(post.userUid),
                     child: const CircleAvatar(
                       backgroundColor: Color.fromARGB(255, 188, 213, 255),
-                      child: Icon(Icons.person_add),
+                      child: Icon(Icons.edit),
                     ),
                   ),
                   title: Text(post.username),

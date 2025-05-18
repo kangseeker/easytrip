@@ -9,6 +9,7 @@ import 'screens/post_list_screen.dart';
 import 'screens/friend_screen.dart';
 import 'screens/profile_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'screens/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,7 +62,7 @@ class EasyTripApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const AuthGate(),
+      home: const SplashScreen(),
     );
   }
 }
